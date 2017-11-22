@@ -82,9 +82,9 @@ fi
 # 移动到根目录 /usr/local/node
 mv $SOURCE_DIR_PATH $INSTALL_ROOT_PATH
 
-# 备份旧的符号链接
+# 删除旧的符号链接
 if [ -L "$CURRENT_VERSION_LINK" ]; then
-    mv $CURRENT_VERSION_LINK "${CURRENT_VERSION_LINK}-$(date +%Y%m%d%H%M%S)"
+    rm $CURRENT_VERSION_LINK
 fi
 
 # 创建新的符号链接
