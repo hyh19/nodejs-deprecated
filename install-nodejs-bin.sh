@@ -69,7 +69,7 @@ if [ -d "$INSTALL_DIR_PATH" ]; then
 fi
 
 # 解压二进制包
-tar zxvf $ARCHIVE_SAVE_PATH
+tar zxf $ARCHIVE_SAVE_PATH
 
 # 重命名二进制文件目录名
 mv $EXTRACT_DIR_NAME $SOURCE_DIR_NAME
