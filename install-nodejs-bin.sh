@@ -41,7 +41,7 @@ SOFTWARE_PROFILE_PATH="/etc/profile.d/${SOFTWARE_NAME}.sh"
 
 # 配置二进制文件路径
 function config_binary_path() {
-    echo "${CURRENT_VERSION_PATH}/bin" > $SOFTWARE_PROFILE_PATH
+    echo "export PATH=\${PATH}:${CURRENT_VERSION_PATH}/bin" > $SOFTWARE_PROFILE_PATH
 }
 
 # 进入工作目录
@@ -74,7 +74,10 @@ tar zxf $ARCHIVE_SAVE_PATH
 # 重命名二进制文件目录名
 mv $EXTRACT_DIR_NAME $SOURCE_DIR_NAME
 
-# 移动到 /usr/local/node
+# 创建安装目录的根目录
+mkdir $INSTALL_ROOT_PATH
+
+# 移动到根目录 /usr/local/node
 mv $SOURCE_DIR_PATH $INSTALL_ROOT_PATH
 
 # 备份旧的符号链接
