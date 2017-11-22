@@ -74,8 +74,10 @@ tar zxf $ARCHIVE_SAVE_PATH
 # 重命名二进制文件目录名
 mv $EXTRACT_DIR_NAME $SOURCE_DIR_NAME
 
-# 创建安装目录的根目录
-mkdir $INSTALL_ROOT_PATH
+if [ ! -d $INSTALL_ROOT_PATH ]; then
+    # 创建安装目录的根目录
+    mkdir $INSTALL_ROOT_PATH
+fi
 
 # 移动到根目录 /usr/local/node
 mv $SOURCE_DIR_PATH $INSTALL_ROOT_PATH
