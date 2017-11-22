@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-## CentOS 7.4 ##
+## CentOS 6.9/7.4, Ubuntu 16.04 ##
 
 # 工作目录
 WORKING_DIR_PATH=/tmp
