@@ -34,14 +34,14 @@ INSTALL_ROOT_PATH="/usr/local/${SOFTWARE_NAME}"
 INSTALL_DIR_PATH="${INSTALL_ROOT_PATH}/${SOURCE_DIR_NAME}"
 
 # 当前使用版本的符号链接
-CURRENT_VERSION_PATH="${INSTALL_ROOT_PATH}/current"
+CURRENT_VERSION_LINK="${INSTALL_ROOT_PATH}/current"
 
 # 二进制文件路径的配置文件
 SOFTWARE_PROFILE_PATH="/etc/profile.d/${SOFTWARE_NAME}.sh"
 
 # 配置二进制文件路径
 function config_binary_path() {
-    echo "export PATH=\${PATH}:${CURRENT_VERSION_PATH}/bin" > $SOFTWARE_PROFILE_PATH
+    echo "export PATH=\${PATH}:${CURRENT_VERSION_LINK}/bin" > $SOFTWARE_PROFILE_PATH
 }
 
 # 进入工作目录
@@ -81,12 +81,12 @@ mkdir $INSTALL_ROOT_PATH
 mv $SOURCE_DIR_PATH $INSTALL_ROOT_PATH
 
 # 备份旧的符号链接
-if [ -L "$CURRENT_VERSION_PATH" ]; then
-    mv $CURRENT_VERSION_PATH "${CURRENT_VERSION_PATH}-$(date +%Y%m%d%H%M%S)"
+if [ -L "$CURRENT_VERSION_LINK" ]; then
+    mv $CURRENT_VERSION_LINK "${CURRENT_VERSION_LINK}-$(date +%Y%m%d%H%M%S)"
 fi
 
 # 创建新的符号链接
-ln -s $INSTALL_DIR_PATH $CURRENT_VERSION_PATH
+ln -s $INSTALL_DIR_PATH $CURRENT_VERSION_LINK
 
 # 配置二进制文件路径
 config_binary_path
