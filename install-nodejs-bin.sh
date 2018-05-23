@@ -52,12 +52,14 @@ function install_dependencies_with_apt() {
     apt-get install -y tar
 }
 
-# 编译和安装
-function make_and_install() {
+# 安装
+function install() {
     # 创建安装目录
     mkdir -p $INSTALL_DIR_CURRENT_PATH
     # 进入解压目录
     cd $UNARCHIVE_DIR_PATH
+    # 复制所有文件到安装目录
+    cp * $INSTALL_DIR_CURRENT_PATH
 }
 
 # PATH 配置
@@ -113,8 +115,8 @@ fi
 # 解压压缩包
 tar zxvf $ARCHIVE_FILE_SAVE_PATH
 
-# 开始编译和安装
-make_and_install
+# 开始安装
+install
 
 # 创建符号链接
 if [ -L "$SYM_LINK" ]; then
