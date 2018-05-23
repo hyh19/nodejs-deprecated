@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-## CentOS 6.9/7.4, Ubuntu 16.04 ##
-
 # 工作目录
-WORKING_DIR_PATH=/tmp
+WORKING_DIR=/tmp
 
 # 软件名称
 SOFTWARE_NAME=node
@@ -11,90 +9,123 @@ SOFTWARE_NAME=node
 # 软件版本
 SOFTWARE_VERSION=8.9.1
 
-# 二进制包名称 node-v8.9.1-linux-x64.tar.gz
-ARCHIVE_NAME="${SOFTWARE_NAME}-v${SOFTWARE_VERSION}-linux-x64.tar.gz"
+# 压缩包名称 node-v8.9.1-linux-x64.tar.gz
+ARCHIVE_FILE_NAME="${SOFTWARE_NAME}-v${SOFTWARE_VERSION}-linux-x64.tar.gz"
 
-# 二进制包下载地址 https://nodejs.org/dist/v8.9.1/node-v8.9.1-linux-x64.tar.gz
-ARCHIVE_DOWNLOAD_URL="https://nodejs.org/dist/v${SOFTWARE_VERSION}/${ARCHIVE_NAME}"
+# 压缩包下载地址 https://nodejs.org/dist/v8.9.1/node-v8.9.1-linux-x64.tar.gz
+ARCHIVE_FILE_DOWNLOAD_URL="https://nodejs.org/dist/v${SOFTWARE_VERSION}/${ARCHIVE_FILE_NAME}"
 
-# 二进制包解压后目录名称 node-v8.9.1-linux-x64
-EXTRACT_DIR_NAME="${SOFTWARE_NAME}-v${SOFTWARE_VERSION}-linux-x64"
+# 压缩包解压后的目录名称 node-v8.9.1-linux-x64
+UNARCHIVE_DIR_NAME="${SOFTWARE_NAME}-v${SOFTWARE_VERSION}-linux-x64"
 
-# 自定义二进制文件目录名称
-SOURCE_DIR_NAME="${SOFTWARE_NAME}-${SOFTWARE_VERSION}"
+# 压缩包下载后的完整路径
+ARCHIVE_FILE_SAVE_PATH="${WORKING_DIR}/${ARCHIVE_FILE_NAME}"
 
-# 二进制包保存路径
-ARCHIVE_SAVE_PATH="${WORKING_DIR_PATH}/${ARCHIVE_NAME}"
+# 压缩包解压后的完整路径
+UNARCHIVE_DIR_PATH="${WORKING_DIR}/${UNARCHIVE_DIR_NAME}"
 
-# 二进制文件所在目录
-SOURCE_DIR_PATH="${WORKING_DIR_PATH}/${SOURCE_DIR_NAME}"
+# 软件各个版本的安装根目录
+INSTALL_DIR_ROOT_PATH=/usr/local/${SOFTWARE_NAME}
 
-# 安装目录的根目录
-INSTALL_ROOT_PATH="/usr/local/${SOFTWARE_NAME}"
+# 软件当前版本的安装目录
+INSTALL_DIR_CURRENT_PATH="${INSTALL_DIR_ROOT_PATH}/${SOFTWARE_NAME}-${SOFTWARE_VERSION}"
 
-# 安装目录
-INSTALL_DIR_PATH="${INSTALL_ROOT_PATH}/${SOURCE_DIR_NAME}"
+# 软件当前版本的符号链接
+SYM_LINK="${INSTALL_DIR_ROOT_PATH}/current"
 
-# 当前使用版本的符号链接
-CURRENT_VERSION_LINK="${INSTALL_ROOT_PATH}/current"
+# PATH 配置文件
+PATH_PROFILE="/etc/profile.d/${SOFTWARE_NAME}.sh"
 
-# 二进制文件路径的配置文件
-SOFTWARE_PROFILE_PATH="/etc/profile.d/${SOFTWARE_NAME}.sh"
+# 判断 Linux 发行版本的脚本
+CHECK_SYS_SCRIPT_NAME="check_sys.sh"
+CHECK_SYS_SCRIPT_DOWNLOAD_URL="https://github.com/mrhuangyuhui/shell/raw/snippets/${CHECK_SYS_SCRIPT_NAME}"
+CHECK_SYS_SCRIPT_SAVE_PATH="${WORKING_DIR}/${CHECK_SYS_SCRIPT_NAME}"
 
-# 配置二进制文件路径
+# 使用 YUM 安装依赖
+function install_dependencies_with_yum() {
+    yum install -y tar
+}
+
+# 使用 APT 安装依赖
+function install_dependencies_with_apt() {
+    apt-get update
+    apt-get install -y tar
+}
+
+# 编译和安装
+function make_and_install() {
+    # 创建安装目录
+    mkdir -p $INSTALL_DIR_CURRENT_PATH
+    # 进入解压目录
+    cd $UNARCHIVE_DIR_PATH
+}
+
+# PATH 配置
 function config_binary_path() {
-    echo "export PATH=\${PATH}:${CURRENT_VERSION_LINK}/bin" > $SOFTWARE_PROFILE_PATH
+    echo "export PATH=\${PATH}:${SYM_LINK}/bin" > $PATH_PROFILE
 }
 
 # 进入工作目录
-cd $WORKING_DIR_PATH
+cd $WORKING_DIR
 
-# 下载二进制包
-if [ ! -e "$ARCHIVE_SAVE_PATH" ]; then
-    wget -O $ARCHIVE_SAVE_PATH $ARCHIVE_DOWNLOAD_URL
-fi
+# 下载判断 Linux 发行版本的脚本
+rm -f $CHECK_SYS_SCRIPT_SAVE_PATH
+wget -O $CHECK_SYS_SCRIPT_SAVE_PATH $CHECK_SYS_SCRIPT_DOWNLOAD_URL
 
-# 下载失败，不再继续。
-if [ ! -e "$ARCHIVE_SAVE_PATH" ]; then
-    echo "[ERROR] Download ${ARCHIVE_NAME} failed."
+if [ -e "$CHECK_SYS_SCRIPT_SAVE_PATH" ]; then
+    . $CHECK_SYS_SCRIPT_SAVE_PATH
+else
+    echo "[ERROR] Download ${CHECK_SYS_SCRIPT_NAME} failed."
     exit 1
 fi
 
-# 备份旧的二进制文件目录
-if [ -d "$SOURCE_DIR_PATH" ]; then
-    mv $SOURCE_DIR_PATH "${SOURCE_DIR_PATH}-$(date +%Y%m%d%H%M%S)"
+# 安装依赖
+if check_sys "packageManager" "yum"; then
+    install_dependencies_with_yum
+elif check_sys "packageManager" "apt"; then
+    install_dependencies_with_apt
+else
+    echo "[ERROR] Not supported distro."
+    exit 1
+fi
+
+# 下载压缩包
+if [ ! -e "$ARCHIVE_FILE_SAVE_PATH" ]; then
+    wget -O $ARCHIVE_FILE_SAVE_PATH $ARCHIVE_FILE_DOWNLOAD_URL
+fi
+
+# 下载失败，不再继续。
+if [ ! -e "$ARCHIVE_FILE_SAVE_PATH" ]; then
+    echo "[ERROR] Download ${ARCHIVE_FILE_NAME} failed."
+    exit 1
+fi
+
+# 备份旧的解压目录
+if [ -d "$UNARCHIVE_DIR_PATH" ]; then
+    mv $UNARCHIVE_DIR_PATH "${UNARCHIVE_DIR_PATH}-$(date +%Y%m%d%H%M%S)"
 fi
 
 # 备份旧的安装目录
-if [ -d "$INSTALL_DIR_PATH" ]; then
-    mv $INSTALL_DIR_PATH "${INSTALL_DIR_PATH}-$(date +%Y%m%d%H%M%S)"
+if [ -d "$INSTALL_DIR_CURRENT_PATH" ]; then
+    mv $INSTALL_DIR_CURRENT_PATH "${INSTALL_DIR_CURRENT_PATH}-$(date +%Y%m%d%H%M%S)"
 fi
 
-# 解压二进制包
-tar zxf $ARCHIVE_SAVE_PATH
+# 解压压缩包
+tar zxvf $ARCHIVE_FILE_SAVE_PATH
 
-# 重命名二进制文件目录名
-mv $EXTRACT_DIR_NAME $SOURCE_DIR_NAME
+# 开始编译和安装
+make_and_install
 
-if [ ! -d $INSTALL_ROOT_PATH ]; then
-    # 创建安装目录的根目录
-    mkdir $INSTALL_ROOT_PATH
+# 创建符号链接
+if [ -L "$SYM_LINK" ]; then
+    rm -f $SYM_LINK
 fi
 
-# 移动到根目录 /usr/local/node
-mv $SOURCE_DIR_PATH $INSTALL_ROOT_PATH
+ln -s $INSTALL_DIR_CURRENT_PATH $SYM_LINK
 
-# 删除旧的符号链接
-if [ -L "$CURRENT_VERSION_LINK" ]; then
-    rm $CURRENT_VERSION_LINK
-fi
-
-# 创建新的符号链接
-ln -s $INSTALL_DIR_PATH $CURRENT_VERSION_LINK
-
-# 配置二进制文件路径
+# PATH 配置
 config_binary_path
 
 echo "################################################################################"
-echo "# Open a new terminal or enter: source ${SOFTWARE_PROFILE_PATH}"
+echo "# Open a new terminal or enter: source ${PATH_PROFILE}"
 echo "################################################################################"
