@@ -59,7 +59,7 @@ function install() {
     # 进入解压目录
     cd $UNARCHIVE_DIR_PATH
     # 复制所有文件到安装目录
-    cp * $INSTALL_DIR_CURRENT_PATH
+    cp -r * $INSTALL_DIR_CURRENT_PATH
 }
 
 # PATH 配置
