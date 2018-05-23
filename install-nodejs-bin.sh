@@ -113,7 +113,7 @@ if [ -d "$INSTALL_DIR_CURRENT_PATH" ]; then
 fi
 
 # 解压压缩包
-tar zxvf $ARCHIVE_FILE_SAVE_PATH
+tar zxf $ARCHIVE_FILE_SAVE_PATH
 
 # 开始安装
 install
